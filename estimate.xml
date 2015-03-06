@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<tryton>
+  <data>
+
+          <record model="ir.ui.view" id="estimate_view_form">
+              <field name="model">estimate.estimate</field>
+              <field name="type">form</field>
+              <field name="name">estimate_form</field>
+          </record>
+
+          <record model="ir.ui.view" id="estimate_view_tree">
+              <field name="model">estimate.estimate</field>
+              <field name="type">tree</field>
+              <field name="name">estimate_tree</field>
+          </record>
+
+
+          <record model="ir.action.act_window" id="act_estimate">
+            <field name="name">Estimates</field>
+            <field name="res_model">estimate.estimate</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_estimate_form_view1">
+            <field name="sequence" eval="10"/>
+            <field name="view" ref="estimate_view_tree"/>
+            <field name="act_window" ref="act_estimate"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_estimate_form_view2">
+            <field name="sequence" eval="20"/>
+            <field name="view" ref="estimate_view_form"/>
+            <field name="act_window" ref="act_estimate"/>
+        </record>
+        <menuitem name="Estimates" sequence="20" id="menu_estimate"
+            action="act_estimate"/>
+
+    </data>
+</tryton>

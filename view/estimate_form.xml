@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+
+<form string="Estimations">
+    <label name="length"/>
+    <field name="length"/>
+    <label name="length_uom"/>
+    <field name="length_uom"/>
+    <label name="width"/>
+    <field name="width"/>
+    <label name="width_uom"/>
+    <field name="width_uom"/>
+    <label name="distance"/>
+    <field name="distance"/>
+    <label name="number_of_steps"/>
+    <field name="number_of_steps"/>
+
+    <separator id="estimations" string="Estimations" colspan="4"/>
+    <label name="driving_time"/>
+    <field name="driving_time"/>
+    <label name="step_cleaning_time"/>
+    <field name="step_cleaning_time"/>
+    <label name="deck_cleaning_time"/>
+    <field name="deck_cleaning_time"/>
+    <label name="revenue"/>
+    <field name="revenue"/>
+
+</form>
