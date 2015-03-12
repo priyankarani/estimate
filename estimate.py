@@ -104,9 +104,9 @@ class EstimateJobStart(ModelView):
     __name__ = 'estimate.estimate_job.start'
 
     estimate_time_type = fields.Selection([
-        ('distance', 'Distance'),
-        ('area', 'Area'),
-        ('steps', 'Number of steps')
+        ('Driving Time', 'Driving Time'),
+        ('Area', 'Area'),
+        ('Steps', 'Number of steps')
     ], 'Estimate Time Type', required=True)
 
     estimated_result = fields.Numeric("Esimated Result")
@@ -127,7 +127,7 @@ class EstimateJob(Wizard):
         'estimate.estimate_job.start',
         'estimate.estimate_job_view_form_start', [
             Button('Cancel', 'end', 'tryton-cancel'),
-            Button('OK', 'estimate_', 'tryton-ok', default=True),
+            Button('Estimate', 'estimate_', 'tryton-ok', default=True),
         ]
     )
     estimate_ = StateTransition()
@@ -150,15 +150,15 @@ class EstimateJob(Wizard):
         estimate = Estimate(Transaction().context.get('active_id'))
 
         type = self.start.estimate_time_type
-        if type == 'area':
+        if type == 'Area':
             return Decimal(
                 (estimate.length * 2) + (estimate.width * 3)
             )
 
-        elif type == 'driving_time':
+        elif type == 'Driving Time':
             return Decimal(estimate.distance / 15)
 
-        elif type == 'steps':
+        elif type == 'Steps':
             return Decimal(estimate.number_of_steps / 4)
 
     def default_result(self, data):
