@@ -30,7 +30,32 @@
             <field name="act_window" ref="act_estimate"/>
         </record>
         <menuitem name="Estimates" sequence="20" id="menu_estimate"
-            action="act_estimate"/>
+          action="act_estimate"/>
+
+
+        <!---Wizard for estimate-->
+        <record model="ir.action.wizard" id="wizard_estimate_job">
+            <field name="name">Estimate Job Hours</field>
+            <field name="wiz_name">estimate.estimate_job</field>
+            <field name="model">estimate.estimate</field>
+        </record>
+
+        <record model="ir.action.keyword" id="act_wizard_estimate_job">
+            <field name="keyword">form_action</field>
+            <field name="model">estimate.estimate,-1</field>
+            <field name="action" ref="wizard_estimate_job"/>
+        </record>
+
+        <record model="ir.ui.view" id="estimate_job_view_form_start">
+              <field name="model">estimate.estimate_job.start</field>
+              <field name="type">form</field>
+              <field name="name">wizard_estimate_job_start_form</field>
+        </record>
+        <record model="ir.ui.view" id="estimate_job_view_form_result">
+              <field name="model">estimate.estimate_job.result</field>
+              <field name="type">form</field>
+              <field name="name">wizard_estimate_job_result_form</field>
+        </record>
 
     </data>
 </tryton>

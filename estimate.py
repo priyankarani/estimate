@@ -6,11 +6,13 @@
     :license: BSD, see LICENSE for more details.
 """
 from trytond.model import ModelSQL, ModelView, fields
+from trytond.wizard import Wizard, StateView, StateTransition, Button
 from trytond.pyson import Eval, Id, Bool
 from decimal import Decimal
 from trytond.pool import Pool
+from trytond.transaction import Transaction
 
-__all__ = ['Estimate']
+__all__ = ['Estimate', 'EstimateJobResult', 'EstimateJobStart', 'EstimateJob']
 
 
 class Estimate(ModelSQL, ModelView):
@@ -94,4 +96,76 @@ class Estimate(ModelSQL, ModelView):
         Returns estimated revenue
         """
         return (self.driving_time / 4) + \
-                (self.deck_cleaning_time + self.step_cleaning_time) * 70
+            (self.deck_cleaning_time + self.step_cleaning_time) * 70
+
+
+class EstimateJobStart(ModelView):
+    "Estimate Job Start"
+    __name__ = 'estimate.estimate_job.start'
+
+    estimate_time_type = fields.Selection([
+        ('distance', 'Distance'),
+        ('area', 'Area'),
+        ('steps', 'Number of steps')
+    ], 'Estimate Time Type', required=True)
+
+    estimated_result = fields.Numeric("Esimated Result")
+
+
+class EstimateJobResult(ModelView):
+    'Estimate Job'
+    __name__ = 'estimate.estimate_job.result'
+
+    message = fields.Text("Message", readonly=True)
+
+
+class EstimateJob(Wizard):
+    'Estimate Job'
+    __name__ = 'estimate.estimate_job'
+
+    start = StateView(
+        'estimate.estimate_job.start',
+        'estimate.estimate_job_view_form_start', [
+            Button('Cancel', 'end', 'tryton-cancel'),
+            Button('OK', 'estimate_', 'tryton-ok', default=True),
+        ]
+    )
+    estimate_ = StateTransition()
+    result = StateView(
+        'estimate.estimate_job.result',
+        'estimate.estimate_job_view_form_result', [
+            Button('Ok', 'end', 'tryton-ok', default=True),
+        ]
+    )
+
+    def transition_estimate_(self):
+        """
+        Estimate result and proceed to next state
+        """
+        return 'result'
+
+    def _calculate_hours(self):
+        Estimate = Pool().get('estimate.estimate')
+
+        estimate = Estimate(Transaction().context.get('active_id'))
+
+        type = self.start.estimate_time_type
+        if type == 'area':
+            return Decimal(
+                (estimate.length * 2) + (estimate.width * 3)
+            )
+
+        elif type == 'driving_time':
+            return Decimal(estimate.distance / 15)
+
+        elif type == 'steps':
+            return Decimal(estimate.number_of_steps / 4)
+
+    def default_result(self, data):
+        message = "Estimated %s is %d" % (
+            self.start.estimate_time_type, self._calculate_hours()
+        )
+
+        return {
+            'message': message
+        }

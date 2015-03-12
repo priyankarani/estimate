@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+
+
+<form string="Estimate Job start">
+
+  <label name="estimate_time_type"/>
+  <field name="estimate_time_type"/>
+
+</form>
