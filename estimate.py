@@ -19,7 +19,7 @@ class Estimate(ModelSQL, ModelView):
     __name__ = 'estimate.estimate'
 
     length = fields.Numeric(
-        'Length', digits=(16, Eval('length_digits', 2)), required=True
+        'Length', digits=(16, Eval('length_digits', 2))
     )
     length_uom = fields.Many2One(
         'product.uom', 'Length Uom',
@@ -30,7 +30,7 @@ class Estimate(ModelSQL, ModelView):
     )
 
     width = fields.Numeric(
-        'Width', digits=(16, Eval('width_digits', 2)), required=True
+        'Width', digits=(16, Eval('width_digits', 2))
     )
 
     width_uom = fields.Many2One(
@@ -42,10 +42,10 @@ class Estimate(ModelSQL, ModelView):
         depends=['width']
     )
 
-    distance = fields.Numeric("Distance ( In Miles)", required=True)
+    distance = fields.Numeric("Distance ( In Miles)")
 
     number_of_steps = fields.Numeric(
-        "Number Of Steps To The Deck", required=True
+        "Number Of Steps To The Deck")
     )
 
     driving_time = fields.Function(
@@ -95,3 +95,77 @@ class Estimate(ModelSQL, ModelView):
         """
         return (self.driving_time / 4) + \
                 (self.deck_cleaning_time + self.step_cleaning_time) * 70
+
+class EstimateJobStart(ModelView):
+	"Estimate Job Start"
+	__name__ = 'estimate.estimate_job.start'
+
+	estimate_Time_type = fields.Selection([
+		('distance', Distance'),
+		('area', 'Area'),
+                ('steps', 'Number of steps')
+        ], 'Estimate Time Type', required=True)
+
+    length = fields.Numeric(
+        'Length', digits=(16, Eval('length_digits', 2)),
+	states={
+		'invisible': Eval('estimate_time_type') != 'area',
+		'required': Eval('estimate_time_type') == 'area',
+  	 }, depends=['estimate_time_type)
+    )
+    length_uom = fields.Many2One(
+        'product.uom', 'Length Uom',
+        domain=[('category', '=', Id('product', 'uom_cat_length'))],
+        states={
+            'required': Bool(Eval('length')) & Eval('estimate_time_type') == 'area',
+	    'invisible': ~(Bool(Eval('length')) & Eval('estimate_time_type') == 'area'),
+        }, depends=['length', 'estimate_time_type']
+    )
+
+    width = fields.Numeric(
+        'Width', digits=(16, 2),
+            states={
+                'invisible': Eval('estimate_time_type') != 'area',
+                'required': Eval('estimate_time_type') == 'area',
+         }, depends=['estimate_time_type) 
+    )
+
+
+    width_uom = fields.Many2One(
+        'product.uom', 'Width Uom',
+        domain=[('category', '=', Id('product', 'uom_cat_length'))],
+        states={
+            'required': Bool(Eval('length')) & Eval('estimate_time_type') == 'area',
+            'invisible': ~(Bool(Eval('length')) & Eval('estimate_time_type') == 'area'),
+        }, depends=['width', 'estimate_time_type']
+    )
+
+    distance = fields.Numeric("Distance ( In Miles)")
+            states={
+                'invisible': Eval('estimate_time_type') != 'distance',
+                'required': Eval('estimate_time_type') == 'distance',
+         }, depends=['estimate_time_type']
+    )
+
+    number_of_steps = fields.Numeric(
+        "Number Of Steps To The Deck")
+            states={
+                'invisible': Eval('estimate_time_type') != 'steps',
+                'required': Eval('estimate_time_type') == 'steps',
+         }, depends=['estimate_time_type']
+    )
+	
+class EstimateJob(Wizard):
+	'Estimate Job'
+	__name__ = 'estimate.estimate_job',
+	start = StateView('estimate.estimate_job.start',
+            'estimate.estimate_job_view_form', [
+            Button('Cancel', 'end', 'tryton-cancel').
+            Button('Estimate', 'estimate_', 'tryton-ok', default=True),
+	    ])
+	estimate_ = StateAction('estimate.act_estimate_form')
+
+	def do_estimate(self, action):
+	    Estimate = Pool.get('estimate.estimate')
+               
+
